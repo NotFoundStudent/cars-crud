@@ -55,3 +55,4 @@ def test_user_edits_car_and_change_survives_reload(page, live_server):
     expect(page.locator("#car-title")).to_have_text("Honda Accord", timeout=8000)
     expect(page.locator("#car-model")).to_have_text("Accord", timeout=8000)
     expect(page.locator("#car-year")).to_have_text("2023", timeout=8000)
+
