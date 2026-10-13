@@ -34,7 +34,7 @@ def test_user_edits_car_and_change_survives_reload(page, live_server):
     # 4. 等待编辑表单加载完成
     expect(page.locator("#page-title")).to_have_text("Edit car")
     expect(page.locator("#save-button")).to_have_text("Save changes")
-    # ✅ 新增：等待按钮解除禁用，必须可以点击，再往下操作！
+    # 等待保存按钮解除禁用，可以点击
     expect(page.locator("#save-button")).to_be_enabled(timeout=8000)
 
     # 5. 修改车型和年份，先清空输入框
