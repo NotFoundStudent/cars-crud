@@ -4,31 +4,47 @@ from playwright.sync_api import expect
 
 def test_user_creates_car_in_browser(page, live_server):
     page.goto(f"{live_server}/cars/new")
-    page.get_by_label("Make", exact=True).fill("Toyota")
-    page.get_by_label("Model", exact=True).fill("Yaris")
-    page.get_by_label("Year", exact=True).fill("2020")
-    page.get_by_label("Color", exact=False).fill("Blue")
-    page.get_by_role("button", name="Create car").click()
+    page.locator("#make").fill("Toyota")
+    page.locator("#model").fill("Yaris")
+    page.locator("#year").fill("2020")
+    page.locator("#color").fill("Blue")
+    page.locator("#save-button").click()
+
     expect(page).to_have_url(re.compile(r"/cars/\d+$"))
-    expect(page.get_by_role("heading", name="Toyota Yaris")).to_be_visible()
+    expect(page.locator("#car-title")).to_have_text("Toyota Yaris")
+    expect(page.locator("#car-model")).to_have_text("Yaris")
 
 
-# 自己写E2E测试：编辑车辆，刷新页面修改依然保留
 def test_user_edits_car_and_change_survives_reload(page, live_server):
+    # 1. 创建一台车
     page.goto(f"{live_server}/cars/new")
-    page.get_by_label("Make", exact=True).fill("Honda")
-    page.get_by_label("Model", exact=True).fill("Civic")
-    page.get_by_label("Year", exact=True).fill("2022")
-    page.get_by_label("Color", exact=False).fill("Silver")
-    page.get_by_role("button", name="Create car").click()
+    page.locator("#make").fill("Honda")
+    page.locator("#model").fill("Civic")
+    page.locator("#year").fill("2022")
+    page.locator("#color").fill("Silver")
+    page.locator("#save-button").click()
 
-    # 点击编辑链接
-    page.get_by_role("link", name="Edit car").click()
-    page.get_by_label("Model", exact=True).fill("Accord")
-    page.get_by_label("Year", exact=True).fill("2023")
-    page.get_by_role("button", name="Save changes").click()
+    # 2. 等待跳到详情页，确认标题显示
+    expect(page).to_have_url(re.compile(r"/cars/\d+$"))
+    expect(page.locator("#car-title")).to_have_text("Honda Civic")
 
-    expect(page.get_by_role("heading", name="Honda Accord")).to_be_visible()
+    # 3. 点编辑链接，进入编辑表单
+    page.locator("#edit-link").click()
+
+    # 4. 等待编辑表单加载完成（JS会把按钮文字改成"Save changes"）
+    expect(page.locator("#page-title")).to_have_text("Edit car")
+    expect(page.locator("#save-button")).to_have_text("Save changes")
+
+    # 5. 修改车型和年份
+    page.locator("#model").fill("Accord")
+    page.locator("#year").fill("2023")
+    page.locator("#save-button").click()
+
+    # 6. 等待跳回详情页，标题变成新名字
+    expect(page.locator("#car-title")).to_have_text("Honda Accord")
+
+    # 7. 刷新页面，确认修改持久化
     page.reload()
+    expect(page.locator("#car-title")).to_have_text("Honda Accord")
     expect(page.locator("#car-model")).to_have_text("Accord")
     expect(page.locator("#car-year")).to_have_text("2023")
