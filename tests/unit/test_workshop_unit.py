@@ -1,0 +1,21 @@
+from app.schemas import CarInput
+import pytest
+from pydantic import ValidationError
+
+
+def test_car_text_fields_are_trimmed():
+    car = CarInput(
+        make=" Mazda ",
+        model=" MX-5 ",
+        year=2020,
+        color=" Red "
+    )
+    assert car.make == "Mazda"
+    assert car.model == "MX-5"
+    assert car.color == "Red"
+
+
+# 自己写的单元测试：空白model抛出校验异常
+def test_blank_model_is_rejected():
+    with pytest.raises(ValidationError):
+        CarInput(make="Mazda", model=" ", year=2020)
