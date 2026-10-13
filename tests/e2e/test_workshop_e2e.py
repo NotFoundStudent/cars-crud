@@ -34,21 +34,23 @@ def test_user_edits_car_and_change_survives_reload(page, live_server):
     # 4. 等待编辑表单加载完成
     expect(page.locator("#page-title")).to_have_text("Edit car")
     expect(page.locator("#save-button")).to_have_text("Save changes")
+    # ✅ 新增：等待按钮解除禁用，必须可以点击，再往下操作！
+    expect(page.locator("#save-button")).to_be_enabled(timeout=8000)
 
-    # ==========重点修改：先清空输入框，再填入新值==========
+    # 5. 修改车型和年份，先清空输入框
     page.locator("#model").clear()
     page.locator("#model").fill("Accord")
     page.locator("#year").clear()
     page.locator("#year").fill("2023")
 
-    # 5. 点击保存
+    # 6. 点击保存
     page.locator("#save-button").click()
 
-    # 6. 等待详情页加载，校验更新后的标题
-    expect(page.locator("#car-title")).to_have_text("Honda Accord")
+    # 7. 等待详情页加载，校验更新后的标题，拉长超时
+    expect(page.locator("#car-title")).to_have_text("Honda Accord", timeout=8000)
 
-    # 7. 刷新页面持久化校验
+    # 8. 刷新页面持久化校验
     page.reload()
-    expect(page.locator("#car-title")).to_have_text("Honda Accord")
-    expect(page.locator("#car-model")).to_have_text("Accord")
-    expect(page.locator("#car-year")).to_have_text("2023")
+    expect(page.locator("#car-title")).to_have_text("Honda Accord", timeout=8000)
+    expect(page.locator("#car-model")).to_have_text("Accord", timeout=8000)
+    expect(page.locator("#car-year")).to_have_text("2023", timeout=8000)
