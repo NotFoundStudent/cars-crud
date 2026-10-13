@@ -34,7 +34,7 @@ def test_user_edits_car_and_change_survives_reload(page, live_server):
     # 4. 等待编辑表单加载完成
     expect(page.locator("#page-title")).to_have_text("Edit car")
     expect(page.locator("#save-button")).to_have_text("Save changes")
-    # 等待保存按钮解除禁用，可以点击
+    # ==========新增这一行！！等待按钮可用==========
     expect(page.locator("#save-button")).to_be_enabled(timeout=8000)
 
     # 5. 修改车型和年份，先清空输入框
@@ -46,7 +46,8 @@ def test_user_edits_car_and_change_survives_reload(page, live_server):
     # 6. 点击保存
     page.locator("#save-button").click()
 
-    # 7. 等待详情页加载，校验更新后的标题，拉长超时
+    # 7. 等待跳转回详情页面，增加超时
+    expect(page).to_have_url(re.compile(r"/cars/\d+$"), timeout=8000)
     expect(page.locator("#car-title")).to_have_text("Honda Accord", timeout=8000)
 
     # 8. 刷新页面持久化校验
